@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ailem">
+<meta name="theme-color" content="#fdf6ec">
+<link rel="manifest" href="manifest.json">
+<title>Ailem</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#fdf6ec;color:#3a2e22;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px}
+h1{margin:0;font-size:30px}
+.edit{border:0;background:#eadfcc;color:#6b5a45;border-radius:20px;padding:8px 14px;font-size:14px}
+section{padding:6px 12px 14px}
+h2{font-size:18px;color:#8a7358;margin:10px 6px;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;padding:12px;background:#fff;border-radius:20px;box-shadow:0 2px 8px #0001}
+.card{width:42%;max-width:180px;text-align:center}
+.ph{width:100%;aspect-ratio:1;border-radius:50%;overflow:hidden;background:#e8d9bf;display:flex;align-items:center;justify-content:center;font-size:48px;color:#8a7358;border:4px solid #f1e4cc}
+.ph img{width:100%;height:100%;object-fit:cover}
+.card b{display:block;margin-top:8px;font-size:21px}
+.add{width:42%;max-width:180px;aspect-ratio:1;border-radius:50%;border:3px dashed #c9b693;background:none;font-size:44px;color:#c9b693;align-self:flex-start}
+.ov{position:fixed;inset:0;background:#fdf6ec;z-index:9;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow:auto}
+.ov img,.ov .big{width:min(80vw,60vh);aspect-ratio:1;border-radius:50%;object-fit:cover;border:6px solid #f1e4cc}
+.ov .big{background:#e8d9bf;display:flex;align-items:center;justify-content:center;font-size:110px;color:#8a7358}
+.ov h1{font-size:44px;margin:20px 0 6px}
+.ov p{font-size:28px;margin:0;color:#6b5a45}
+.form{width:100%;max-width:420px;text-align:left}
+.form label{display:block;margin:12px 0 4px;font-size:15px;color:#6b5a45}
+.form input[type=text]{width:100%;padding:12px;font-size:18px;border:2px solid #e2d3b8;border-radius:12px}
+.btn{display:block;width:100%;padding:14px;margin-top:12px;font-size:18px;border:0;border-radius:12px;background:#e8d9bf;color:#3a2e22}
+.btn.p{background:#4a7c59;color:#fff}.btn.d{background:#f3d6d2;color:#9a2a1f}
+.tools{display:flex;gap:8px;justify-content:center;padding:6px 12px 20px}
+.tools .btn{margin:0;font-size:15px;padding:10px}
+.pv{width:120px;height:120px;border-radius:50%;object-fit:cover;background:#e8d9bf;display:block;margin:0 auto}
+</style>
+</head>
+<body>
+<header><h1>👨‍👩‍👧 Ailem</h1><button class="edit" id="eb">✎ Düzenle</button></header>
+<main id="app"></main>
+<div class="tools" id="tools" hidden>
+<button class="btn" id="bk">Yedekle</button>
+<button class="btn" id="rs">Yedeği yükle</button>
+<input type="file" id="rf" accept=".json" hidden>
+</div>
+<script>
+var KEY='ailem-v1',edit=false;
+var S=load();
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&s.people)return s}catch(e){}
+return{rows:['Anne ve Babası','Kendisi ve Eşi','Çocukları','Torunları'],people:[
+{id:'a1',row:0,name:'Annesi',rel:'Sizin annenizdir',photo:''},
+{id:'a2',row:0,name:'Babası',rel:'Sizin babanızdır',photo:''},
+{id:'b1',row:1,name:'Kendisi',rel:'Bu sizsiniz',photo:''},
+{id:'b2',row:1,name:'Eşi',rel:'Sizin eşinizdir',photo:''},
+{id:'c1',row:2,name:'Kızı',rel:'Sizin kızınızdır',photo:''},
+{id:'c2',row:2,name:'Damadı',rel:'Sizin damadınızdır',photo:''},
+{id:'d1',row:3,name:'Torunu',rel:'Sizin torununuzdur',photo:''}]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert('Kaydedilemedi: yer dolmuş olabilir.')}}
+function esc(t){return String(t||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function ph(p,cls){return p.photo?'<img src="'+p.photo+'" alt="">':'<div class="'+cls+'">'+esc((p.name||'?').charAt(0))+'</div>'}
+function render(){
+document.getElementById('eb').textContent=edit?'✔ Bitti':'✎ Düzenle';
+document.getElementById('tools').hidden=!edit;
+document.getElementById('app').innerHTML=S.rows.map(function(r,i){
+return '<section><h2>'+esc(r)+'</h2><div class="row">'+
+S.people.filter(function(p){return p.row===i}).map(function(p){
+return '<div class="card" data-id="'+p.id+'"><div class="ph">'+(p.photo?'<img src="'+p.photo+'" alt="">':esc((p.name||'?').charAt(0)))+'</div><b>'+esc(p.name)+'</b></div>'}).join('')+
+(edit?'<button class="add" data-add="'+i+'">＋</button>':'')+'</div></section>'}).join('')}
+function overlay(html){var o=document.createElement('div');o.className='ov';o.innerHTML=html;document.body.appendChild(o);return o}
+function view(p){
+var o=overlay((p.photo?'<img src="'+p.photo+'" alt="">':'<div class="big">'+esc((p.name||'?').charAt(0))+'</div>')+'<h1>'+esc(p.name)+'</h1><p>'+esc(p.rel)+'</p>');
+o.onclick=function(){o.remove()}}
+function editor(p,row){
+var isNew=!p;var c=p?JSON.parse(JSON.stringify(p)):{id:'p'+Date.now(),row:row,name:'',rel:'',photo:''};
+var o=overlay('<div class="form"><img class="pv" id="pv" alt="">'+
+'<button class="btn" id="pb">📷 Fotoğraf seç</button><input type="file" id="pf" accept="image/*" hidden>'+
+'<label>Adı</label><input type="text" id="nm" value="'+esc(c.name)+'">'+
+'<label>Yakınlığı (ona nasıl söylenecek? Örn: Sizin kızınızdır)</label><input type="text" id="rl" value="'+esc(c.rel)+'">'+
+'<button class="btn p" id="sv">Kaydet</button>'+(isNew?'':'<button class="btn d" id="dl">Sil</button>')+'<button class="btn" id="cn">Vazgeç</button></div>');
+var pv=o.querySelector('#pv');function sp(){if(c.photo)pv.src=c.photo;else pv.removeAttribute('src')}sp();
+o.querySelector('#pb').onclick=function(){o.querySelector('#pf').click()};
+o.querySelector('#pf').onchange=function(e){var f=e.target.files[0];if(!f)return;var u=URL.createObjectURL(f),im=new Image();
+im.onload=function(){var m=500,s=Math.min(1,m/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=im.width*s;cv.height=im.height*s;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);c.photo=cv.toDataURL('image/jpeg',.8);URL.revokeObjectURL(u);sp()};im.src=u};
+o.querySelector('#cn').onclick=function(){o.remove()};
+o.querySelector('#sv').onclick=function(){c.name=o.querySelector('#nm').value.trim()||'?';c.rel=o.querySelector('#rl').value.trim();
+if(isNew)S.people.push(c);else S.people[S.people.findIndex(function(x){return x.id===c.id})]=c;save();o.remove();render()};
+var d=o.querySelector('#dl');if(d)d.onclick=function(){if(confirm('Bu kişi silinsin mi?')){S.people=S.people.filter(function(x){return x.id!==c.id});save();o.remove();render()}}}
+document.getElementById('app').onclick=function(e){
+var a=e.target.closest('[data-add]');if(a){editor(null,+a.dataset.add);return}
+var d=e.target.closest('[data-id]');if(!d)return;
+var p=S.people.find(function(x){return x.id===d.dataset.id});edit?editor(p):view(p)};
+document.getElementById('eb').onclick=function(){edit=!edit;render()};
+document.getElementById('bk').onclick=function(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='ailem-yedek.json';a.click()};
+document.getElementById('rs').onclick=function(){document.getElementById('rf').click()};
+document.getElementById('rf').onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var s=JSON.parse(r.result);if(!s.people)throw 0;S=s;save();render()}catch(x){alert('Yedek dosyası okunamadı.')}};r.readAsText(f)};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+render();
+</script>
+</body>
+</html>
