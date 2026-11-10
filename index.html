@@ -49,15 +49,18 @@ h2{font-size:18px;color:#8a7358;margin:10px 6px;font-weight:600}
 <script>
 var KEY='ailem-v1',edit=false;
 var S=load();
-function load(){try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&s.people)return s}catch(e){}
-return{rows:['Anne ve Babası','Kendisi ve Eşi','Çocukları','Torunları'],people:[
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY));if(s&&s.people){
+if(s.rows.indexOf('Kardeşleri')<0){s.rows.splice(2,0,'Kardeşleri');s.people.forEach(function(p){if(p.row>=2)p.row++})}
+return s}}catch(e){}
+return{rows:['Anne ve Babası','Kendisi ve Eşi','Kardeşleri','Çocukları','Torunları'],people:[
 {id:'a1',row:0,name:'Annesi',rel:'Sizin annenizdir',photo:''},
 {id:'a2',row:0,name:'Babası',rel:'Sizin babanızdır',photo:''},
 {id:'b1',row:1,name:'Kendisi',rel:'Bu sizsiniz',photo:''},
 {id:'b2',row:1,name:'Eşi',rel:'Sizin eşinizdir',photo:''},
-{id:'c1',row:2,name:'Kızı',rel:'Sizin kızınızdır',photo:''},
-{id:'c2',row:2,name:'Damadı',rel:'Sizin damadınızdır',photo:''},
-{id:'d1',row:3,name:'Torunu',rel:'Sizin torununuzdur',photo:''}]}}
+{id:'k1',row:2,name:'Kardeşi',rel:'Sizin kardeşinizdir',photo:''},
+{id:'c1',row:3,name:'Kızı',rel:'Sizin kızınızdır',photo:''},
+{id:'c2',row:3,name:'Damadı',rel:'Sizin damadınızdır',photo:''},
+{id:'d1',row:4,name:'Torunu',rel:'Sizin torununuzdur',photo:''}]}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert('Kaydedilemedi: yer dolmuş olabilir.')}}
 function esc(t){return String(t||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function ph(p,cls){return p.photo?'<img src="'+p.photo+'" alt="">':'<div class="'+cls+'">'+esc((p.name||'?').charAt(0))+'</div>'}
